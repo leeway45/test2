@@ -27,3 +27,4 @@ crash.log
 # Ignore SSH keys or other secrets (customize as needed)
 *.pem
 *.key
+test-1.tf
