@@ -23,7 +23,7 @@ resource "aws_lb_target_group" "tg" {
     path                = "/"
     port                = "traffic-port"
     protocol            = "HTTP"
-    interval            = 30
+    interval            = 15
     timeout             = 10
     healthy_threshold   = 3
     unhealthy_threshold = 5
@@ -42,14 +42,35 @@ resource "aws_lb_listener" "listener" {
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg.arn
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
     tags = {
     Name = "listener"
   }
 }
 
+resource "aws_lb_listener" "https_listener" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = "arn:aws:acm:ap-northeast-1:490004624266:certificate/554c8dfa-996e-4a27-9e3b-dcb058e20583"
+  
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg.arn
+  }
+
+    tags = {
+    Name = "https_listener"
+  } 
+
+}
 
 
 resource "aws_launch_template" "web_t" {
